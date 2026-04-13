@@ -1,0 +1,26 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+
+# Large data files (reproducible via pipeline)
+data/pbmc3k_processed.h5ad
+data/pbmc3k_raw.h5ad
+src/data/
+data/fit_results_*.csv
+data/model_selection_*.csv
+data/scvi_results/
+data/glmpca_results/
