@@ -1,19 +1,27 @@
 # Modelling Single-cell RNA-Seq Data Distributions
 
-CPSC 445 (Algorithms in Bioinformatics) Course Project — University of British Columbia
+CPSC 445 (Algorithms in Bioinformatics) course project, University of British Columbia
+
+## Versions
+
+- `main` (September 2026): revised report and README. The analysis, code, and figures are unchanged.
+  - Wording: notes about earlier drafts were replaced with a direct description of the study design, and an unsupported novelty claim was removed.
+  - Credit: the feedback on our proposal that pointed out the circularity of HVG-only fitting is now acknowledged.
+  - Corrections, checked against the archived pipeline outputs: the 99.1% figure is now stated over the 1,719 of the top 2,000 HVGs that pass the mean filter; the descriptions of the expression-decile pattern, of which cell types have the highest UMI totals, of the GLM-PCA clustering comparison, and of zero-inflation after cell-type conditioning now match the data; the 0.4% bound on zero-inflation is limited to the analyses reported; and one rounding error in Table 1 is fixed (per-cell-type, no-offset ZINB: from 0.1% to 0.2%).
+- [`submitted-2026-04-13`](https://github.com/Redtropig/scrna-zero-inflation/tree/submitted-2026-04-13): the version submitted for grading on April 13, 2026.
 
 ## Overview
 
-This project systematically evaluates which statistical distributions best model single-cell RNA-seq UMI count data, addressing the "zero-inflation" debate in the field. We compare Poisson, Negative Binomial (NB), Zero-Inflated Poisson (ZIP), and Zero-Inflated Negative Binomial (ZINB) distributions on the PBMC 3k dataset, fitting **all 9,107 post-QC genes** (not just HVGs) under both no-offset and per-cell library-size offset modes. We complement the univariate analysis with scVI and GLM-PCA latent-variable models under multiple observation likelihoods, including an explicit multinomial family.
+This project tests which statistical distributions best model single-cell RNA-seq UMI count data, addressing the "zero-inflation" debate in the field. We compare Poisson, Negative Binomial (NB), Zero-Inflated Poisson (ZIP), and Zero-Inflated Negative Binomial (ZINB) distributions on the PBMC 3k dataset, fitting **all 9,107 post-QC genes** (not just HVGs) under both no-offset and per-cell library-size offset modes. We complement the univariate analysis with scVI and GLM-PCA latent-variable models under multiple observation likelihoods, including an explicit multinomial family.
 
 ### Key Findings
 
-- **HVG-only fitting is circularly biased**: Seurat v3 HVG selection picks genes whose variance exceeds the empirical mean-variance trend, pre-stacking a Poisson-vs-NB BIC contest toward NB (99.1% NB on HVGs vs. 43.6% on all genes)
+- **HVG-only fitting is circularly biased**: Seurat v3 HVG selection picks genes whose variance exceeds the empirical mean-variance trend, which tilts a Poisson-vs-NB BIC contest toward NB (99.1% NB on HVGs vs. 43.6% on all genes)
 - **Library-size offset shifts the balance further**: adding a per-cell log-offset moves ~4 pp from NB to Poisson (56.2% Poisson, 39.8% NB)
 - **Cell-type conditioning makes Poisson dominant**: within Leiden clusters, Poisson wins 86.5% of 58,614 gene–cluster BIC contests; NB 11.2%
 - **Zero-inflation is negligible**: 0.1–0.3% of genes/gene-cluster pairs are flagged at ΔBIC > 10, depending on offset mode
 - **scVI confirms overdispersion > zero-inflation**: ZINB–NB gap is ~10 nats/cell vs. NB–Poisson gap of ~50 nats/cell
-- **GLM-PCA confirms Poisson–multinomial equivalence**: the two families differ by 0.2% in deviance and yield indistinguishable UMAP layouts
+- **GLM-PCA confirms Poisson–multinomial equivalence**: the two families differ by 0.2% in deviance and give nearly identical clustering ARI (0.501 vs. 0.500)
 
 ## Project Structure
 
@@ -32,7 +40,7 @@ This project systematically evaluates which statistical distributions best model
 │   ├── 04_heterogeneity.py # Per-cluster re-fitting under both offset modes
 │   ├── 05_scvi.py          # scVI comparison (ZINB, NB, Poisson likelihoods)
 │   ├── 05b_glmpca.py       # GLM-PCA comparison (multinomial, Poisson, NB families)
-│   └── 06_figures.py       # Publication-quality figure generation (8 figures)
+│   └── 06_figures.py       # Figure generation (8 figures)
 └── data/
     ├── pbmc3k_processed.h5ad              # Processed AnnData object
     ├── fit_results_all_cells_{noff,offset}.csv   # Distribution fitting results
@@ -114,7 +122,7 @@ python 05_scvi.py
 #   -> data/glmpca_results/
 python 05b_glmpca.py
 
-# Step 6: Generate all publication figures
+# Step 6: Generate all figures
 #   -> data/figures/fig{1..8}_*.{pdf,png}
 python 06_figures.py
 ```
